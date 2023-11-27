@@ -16,32 +16,60 @@
 let THEME;
 let DATA;
 let TITLE;
+let TIME_FOR_EXAM;
+let AMOUNT_EXAM_QUESTIONS;
+let OPENING_PICTURE;
 
-fetch('../data.json')
+//  Get json of data
+let url = new URL(window.location.href)
+let dataPath = url.searchParams.get('path')
+
+if (!dataPath) {
+    location.href = "./404/404.html";
+}
+
+fetch(`../data/${dataPath}/${dataPath}.json`)
 .then((response) => {
         response.json()
             .then((result) => { 
                 THEME = result.THEME;
                 TITLE = result.TITLE;
                 DATA = result.DATA;
+                TIME_FOR_EXAM = result.TIME_FOR_EXAM;
+                OPENING_PICTURE = result.OPENING_PICTURE;
+                // Max number of question in exam. Make sure it isn't more than the number of questions we have!
+                AMOUNT_EXAM_QUESTIONS = result.AMOUNT_EXAM_QUESTIONS
+                // determine colors
+                changeColors();
+
                 afterLoaded();
              })
-            .catch((err) => { console.log(err) });
+            .catch((err) => {
+                sessionStorage.setItem('dataFetchingErr', err.toString()); 
+                location.href = "./404/404.html";
+             });
     })
-    .catch((err) => { console.log(err) });
+    .catch((err) => { 
+        sessionStorage.setItem('dataFetchingErr', err.toString()); 
+        location.href = "./404/404.html";
+     });
+
+const changeColors = () => {
+    let rootEl = document.querySelector(":root");
+    rootEl.style.setProperty("--primary-color", THEME.primaryColor);
+    rootEl.style.setProperty("--secondary-color", THEME.secondaryColor);
+    rootEl.style.setProperty("--text-color", THEME.textColor);
+    rootEl.style.setProperty("--gradient-color", THEME.gradient);
+    rootEl.style.setProperty("--buttons-color", THEME.buttonsColor);
+}
 
 
-//  Max number of question in exam. Make sure it isn't more than the number of questions we have!
-const AMOUNT_EXAM_QUESTIONS = 0;
-const TIME_FOR_EXAM = "10:00";
 
 
 
 
-/********************************************************************************************************/
-/********************************************************************************************************/
-/********************************************************************************************************/
-/*****  אובייקטים לפי סוג הכרטיסייה המכניסים את התוכן של כל כרטיסייה אל תוך הכרטיסייה  ********/
+
+/* אובייקטים לפי סוג הכרטיסייה המכניסים את התוכן של כל כרטיסייה אל תוך הכרטיסייה */
 
 /**
  * # @type {{[index: string]: {init: (card: HTMLElement, json: any) => void}}}
@@ -119,4 +147,3 @@ CARD_TYPES.freeForm = {
         }
     }
 }
-
